@@ -4,12 +4,21 @@ require_once "helpers/functions.php";
 $page = "login";
 $title = "login";
 
+// $_GET;
+// $_POST;
+// $_SERVER;
+// $_COOKIE;
+// $_SESSION;
+// $_FILES;
+
+$plateform = trim($_SERVER['HTTP_SEC_CH_UA_PLATFORM'], '"');
+
 if (isset($_POST['login'])) {
 
     $email = e($_POST['email']);
     $password = e($_POST['password']);
 
-    $req = $db->prepare("SELECT id FROM users WHERE email = :email  AND password = :password LIMIT 1");
+    $req = $db->prepare("SELECT id FROM users WHERE email = :email AND password = :password LIMIT 1");
     $req->execute(['email' => $email, 'password' => $password]);
     $rows = $req->rowCount();
     if ($rows == 0) {
@@ -20,8 +29,8 @@ if (isset($_POST['login'])) {
     }
     $user_id = $req->fetch()->id;
 
-    $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?");
-    $req->execute([$user_id, IP]);
+    $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?, plateform = ?");
+    $req->execute([$user_id, IP, $plateform]);
 
     $_SESSION['message'] = "Bien coonecter";
     $_SESSION['color'] = "info";

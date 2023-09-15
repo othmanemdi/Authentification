@@ -4,7 +4,27 @@ require_once "helpers/functions.php";
 $page = "user_historique";
 $title = "L'historiques des utilisateurs";
 
-$users_histo = $db->query("SELECT * FROM view_user_historique")->fetchAll();
+// if (isset($_POST['filter'])) {
+//     $plateform = e($_POST['plateform']);
+//     $users_histo = $db->query("SELECT * FROM view_user_historique WHERE plateform = '$plateform' ORDER BY date_connected DESC")->fetchAll();
+// } else {
+//     $users_histo = $db->query("SELECT * FROM view_user_historique ORDER BY date_connected DESC")->fetchAll();
+// }
+
+$query = "";
+if (isset($_POST['filter'])) {
+    $plateform = e($_POST['plateform']);
+    $query = " WHERE plateform = '$plateform' ";
+}
+
+$users_histo = $db->query("SELECT * FROM view_user_historique $query ORDER BY date_connected DESC")->fetchAll();
+
+
+$plateforms = $db->query("SELECT DISTINCT plateform FROM view_user_historique ORDER BY plateform DESC ")->fetchAll();
+
+
+
+
 
 ?>
 <!doctype html>
@@ -35,6 +55,34 @@ $users_histo = $db->query("SELECT * FROM view_user_historique")->fetchAll();
 
             <div class="card-body">
 
+
+
+
+                <form method="post" class="row">
+                    <div class="col-md-4">
+
+                        <div class="mb-3">
+                            <label for="plateform" class="form-label">Plateforms</label>
+                            <select class="form-select" name="plateform" id="plateform">
+                                <?php foreach ($plateforms as $key => $p) : ?>
+                                    <option value="<?= $p->plateform ?>"><?= $p->plateform ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                        <!-- mb-3 -->
+                    </div>
+                    <!-- col -->
+                    <div class="col-md-4">
+                        <button type="submit" name="filter" class="btn btn-light fw-bold mt-4">
+                            <i class="bi bi-funnel-fill"></i>
+                            Filter
+                        </button>
+                    </div>
+                    <!-- col -->
+                </form>
+                <!-- row -->
+
+
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered table-striped">
                         <theade>
@@ -43,10 +91,11 @@ $users_histo = $db->query("SELECT * FROM view_user_historique")->fetchAll();
                                 <th>Nom</th>
                                 <th>Date de connection</th>
                                 <th>IP Adresse</th>
+                                <th>Plateform</th>
                             </tr>
                         </theade>
                         <tbody>
-                            <?php foreach ($users_histo as $key => $v) : ?>
+                            <?php foreach ($users_histo as $v) : ?>
 
                                 <tr>
                                     <td>
@@ -56,10 +105,15 @@ $users_histo = $db->query("SELECT * FROM view_user_historique")->fetchAll();
                                         <?= $v->nom ?>
                                     </td>
                                     <td>
-                                        <?= $v->date_connected ?>
+                                        <?=
+                                        _datetime_format($v->date_connected);
+                                        ?>
                                     </td>
                                     <td>
                                         <?= $v->ip ?>
+                                    </td>
+                                    <td>
+                                        <?= _get_plateform($v->plateform) .  $v->plateform ?>
                                     </td>
                                 </tr>
                             <?php endforeach  ?>
