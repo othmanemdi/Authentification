@@ -16,7 +16,20 @@ if (isset($_POST['filter'])) {
     $plateform = e($_POST['plateform']);
     $query = " WHERE plateform = '$plateform' ";
 }
+// $search = '';
+// if (isset($_POST['rechercher_user_historique'])) {
+//     $user_historique = e($_POST['user_historique']);
+//     $search =  " AND (user_id LIKE '%" . $user_historique . "%' OR nom LIKE '%" . $user_historique . "%' OR email LIKE '%" . $user_historique . "%' OR date_connected LIKE '%" . $user_historique . "%' OR ip LIKE '%" . $user_historique . "%' OR plateform LIKE '%" . $user_historique . "%')";
+// }
 
+
+// $user_historique = $db->query("SELECT * FROM view_user_historique $search ORDER BY date_connected DESC")->fetchAll();
+
+// $search = '';
+// if (isset($_POST['search_user_historique'])) {
+//     $user_historique = e($_POST['user_historique']);
+//     $search = "AND nom lIKE '%" . $nom . "%'";
+// }
 $users_histo = $db->query("SELECT * FROM view_user_historique $query ORDER BY date_connected DESC")->fetchAll();
 
 
@@ -39,12 +52,18 @@ $plateforms = $db->query("SELECT DISTINCT plateform FROM view_user_historique OR
         <!-- place navbar here -->
         <?php include "body/nav.php" ?>
     </header>
+
     <main class="container">
 
         <h3 class="my-3">L'historiques des utilisateurs</h3>
 
         <?php include 'body/message_flash.php' ?>
-
+        <form method="POST" class="d-flex py-2 col-6 mx-auto">
+            <div class="input-group mb-3 me-2">
+                <input type="text" class="form-control" placeholder="Search" name="user_historique" value="<?= isset($_POST['user_historique']) ? e($_POST['user_historique']) : '' ?>" width="10" aria-label="search" aria-describedby="button-addon2">
+                <button class="btn btn-outline-dark" type="submit" name="rechercher_user_historique" id="button-addon2"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
 
         <div class="card mt-2">
             <div class="card-header">
