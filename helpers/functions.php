@@ -56,3 +56,12 @@ function _datetime_format($date)
 {
     return date("d/m/Y H:i:s", strtotime($date));
 }
+
+
+function _get_page_name()
+{
+    $page = $_SERVER['SCRIPT_NAME'];
+    $url_data = explode('/', $page);
+    $page_name = end($url_data);
+    return explode('.', $page_name)[0];
+}

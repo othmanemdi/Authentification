@@ -1,8 +1,21 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
-$page = "login";
+$page = _get_page_name();
 $title = "login";
+
+$password = 123456;
+$password_hash = '$2y$10$OyFrczwupnuXc50nEcV6dOoN6enRVL5ofbOOYk7YIJIIWGnt3shaK';
+
+$test = password_verify($password, $password_hash);
+
+var_dump($test);
+
+exit;
+
+
+
+
 
 // $_GET;
 // $_POST;

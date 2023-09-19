@@ -1,7 +1,7 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
-$page = "user_historique";
+$page = _get_page_name();
 $title = "L'historiques des utilisateurs";
 
 // if (isset($_POST['filter'])) {

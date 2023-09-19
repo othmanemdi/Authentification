@@ -1,7 +1,7 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
-$page = "contact";
+$page = _get_page_name();
 $title = "contact";
 ?>
 <!doctype html>

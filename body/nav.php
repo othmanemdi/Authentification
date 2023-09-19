@@ -8,9 +8,8 @@
             <ul class="navbar-nav me-auto mt-2 mt-lg-0">
 
                 <li class="nav-item">
-                    <a class="nav-link <?= $page == 'home' ? 'fw-bold text-danger' : '' ?>" href="index.php">Home</a>
+                    <a class="nav-link <?= $page == 'index' ? 'fw-bold text-danger' : '' ?>" href="index.php">Home</a>
                 </li>
-
 
                 <li class="nav-item">
                     <a class="nav-link <?= $page == 'contact' ? 'fw-bold text-danger' : '' ?>" href="contact.php">Contact</a>
