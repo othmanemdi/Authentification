@@ -3,6 +3,10 @@ require_once "database/db.php";
 require_once "helpers/functions.php";
 $page = _get_page_name();
 $title = "login";
+$errors = [];
+$class_input_validation_name = $class_text_validation_name = "";
+
+
 
 $password = 123456;
 $password_hash = '$2y$10$OyFrczwupnuXc50nEcV6dOoN6enRVL5ofbOOYk7YIJIIWGnt3shaK';
@@ -30,6 +34,51 @@ if (isset($_POST['login'])) {
 
     $email = e($_POST['email']);
     $password = e($_POST['password']);
+
+    if (empty($nom) or !preg_match('/^[a-zA-Z +]+$/', $nom) or strlen($nom) < 3 or $check_color == 1) {
+
+        if (empty($nom)) {
+            $errors['nom'] = "Veuillez saisir ce champs";
+        } else {
+            if (!preg_match('/^[a-zA-Z +]+$/', $nom)) {
+                $errors['nom'] = "Seule les caractaires autorisé";
+            } else {
+                if (strlen($nom) < 3) {
+                    $errors['nom'] = "Entrer plus que 3 caractaire";
+                }
+            }
+        }
+
+        if ($check_color)
+            $errors['nom'] = $nom . " existant";
+
+        $class_input_validation_name = "is-invalid";
+        $class_text_validation_name = "invalid-feedback";
+    } else {
+        $class_input_validation_name = "is-valid";
+        $class_text_validation_name = "valid-feedback";
+    }
+    if (empty($errors)) {
+        $open_modal = true;
+
+        $couleur = $pdo->prepare("INSERT INTO couleurs SET nom = :nom");
+        $couleur->execute(
+            [
+                'nom' => $nom
+            ]
+        );
+        if ($couleur) {
+            $_SESSION['flash']['info'] = 'Bien ajouter';
+        } else {
+            $_SESSION['flash']['danger'] = 'Error !!';
+        }
+        header('location: couleurs');
+        exit();
+    } else {
+        // header('location: couleurs&modal_classe_id=1');
+        $open_modal = true;
+    }
+}
 
     $req = $db->prepare("SELECT id FROM users WHERE email = :email AND password = :password LIMIT 1");
     $req->execute(['email' => $email, 'password' => $password]);
