@@ -3,16 +3,14 @@ require_once "database/db.php";
 require_once "helpers/functions.php";
 $page = _get_page_name();
 $title = "login";
+// $password = 123456;
+// $password_hash = '$2y$10$OyFrczwupnuXc50nEcV6dOoN6enRVL5ofbOOYk7YIJIIWGnt3shaK';
 
+// $test = password_verify($password, $password_hash);
 
-$password = 123456;
-$password_hash = '$2y$10$OyFrczwupnuXc50nEcV6dOoN6enRVL5ofbOOYk7YIJIIWGnt3shaK';
+// var_dump($test);
 
-$test = password_verify($password, $password_hash);
-
-var_dump($test);
-
-exit;
+// exit;
 
 
 
@@ -68,7 +66,7 @@ if (isset($_POST['login'])) {
         <?php include 'body/message_flash.php' ?>
 
         <div class="row justify-content-center g-2 mt-5">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
                         <h4>Login</h4>

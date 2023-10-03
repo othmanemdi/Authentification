@@ -14,6 +14,19 @@ function dd($value)
     exit;
 }
 
+
+function input($value, $class_input, $class_message, $error)
+{
+    return <<<HTML
+        <div class="mb-3">
+            <input type="text" class="form-control {$class_input}" name="nom" id="nom" placeholder="Nom:" value="{$value}">
+                <span class="text-danger {$class_message}">
+                    {$error}
+                </span>
+         </div>
+HTML;
+}
+
 function e($value)
 {
     return htmlspecialchars(trim($value));

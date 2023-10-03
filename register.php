@@ -4,9 +4,10 @@ require_once "helpers/functions.php";
 $page = _get_page_name();
 $title = "register";
 
-
-$page = _get_page_name();
-$title = "register";
+// $colors_string = "red green blue yellow";
+// $colors = explode(' ', $colors_string);
+// $cs = implode('-', $colors);
+// dd($cs);
 
 $errors = [];
 
@@ -19,88 +20,76 @@ if (isset($_POST['register'])) {
         $password = e($_POST['password']);
         $confirm_password = e($_POST['confirm_password']);
 
-        if ($nom == '') {
-            $errors[] = "Veuillez saisire le champ (nom)";
+        if (empty($nom) || !preg_match('/^[a-zA-Z ]+$/', $nom)) {
+            $errors["nom"] = "Votre nom n'est pas valide";
+            $nom_class_input = "is-invalid";
+            $nom_class_feedback = "invalid-feedback";
+        } else {
+            $nom_class_input = "is-valid";
+            $nom_class_feedback = "valid-feedback";
         }
 
-        if (strlen($nom) < 3) {
-            $errors[] = "(nom) Veuillez saisire Plus que 3 charactéres";
-        }
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors["email"] = "Votre email n'est pas valide";
+            $email_class_input = "is-invalid";
+            $email_class_feedback = "invalid-feedback";
+        } else {
+            $req = $db->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
+            $req->execute([$email]);
+            $rows_user = $req->rowcount();
 
-        if (!preg_match('/^[a-zA-Z]+$/', $nom)) {
-            $errors[] = "(nom) Seul les charactére sont autoriser";
-        }
+            if ($rows_user == 1) {
+                $errors['email'] = 'Cet email ' . $email . ' est déjà utilisé pour un autre compte';
+                $email_class_input = "is-invalid";
+                $email_class_feedback = "invalid-feedback";
+            } else {
+                $email_class_input = "is-valid";
+                $email_class_feedback = "valid-feedback";
+            }
+        } // Fin traitement email
 
 
-        if ($email == '') {
-            $errors[] = "Veuillez saisire le champ (email)";
-        }
+        if (empty($password) || !preg_match('/^[a-zA-Z0-9-@$*. ]+$/', $password)) {
+            $errors["password"] = "Votre mot de passe n'est pas valide";
+            $password_class_input = "is-invalid";
+            $password_class_feedback = "invalid-feedback";
+        } else {
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Email invalide";
-        }
+            if (empty($confirm_password) || ($password != $confirm_password)) {
+                $errors["confirm_password"] = "Les deux mots de passe ne sont pas identiques";
+                $confirm_password_class_input = "is-invalid";
+                $confirm_password_class_feedback = "invalid-feedback";
+                $password_class_input = "is-invalid";
+                $password_class_feedback = "invalid-feedback";
+            } else {
+                $confirm_password_class_input = "is-valid";
+                $confirm_password_class_feedback = "valid-feedback";
 
-        // $email_rows = $db->query("SELECT id FROM users WHERE email = '$email' LIMIT 1")->rowCount();
-
-        $req = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
-        $req->execute([$email]);
-        $email_rows =  $req->rowCount();
-
-        if ($email_rows == 1) {
-            $errors[] = "Cet email '" . $email . "' est déja pris";
-        }
-
-        if ($password == '') {
-            $errors[] = "Veuillez saisire le champ (password)";
-        }
-
-        if (strlen($password) < 6) {
-            $errors[] = "(password) Veuillez saisire Plus que 6 charactéres";
-        }
-
-        if ($confirm_password == '') {
-            $errors[] = "Veuillez saisire le champ (confirm_password)";
-        }
-
-        if ($password != $confirm_password) {
-            $errors[] = "Les deux mot de passe ne sont pas identique";
+                $password_class_input = "is-valid";
+                $password_class_feedback = "valid-feedback";
+            }
         }
     } else {
         $errors[] = "Veuillez remplire tous les champs";
     }
 
-    // Ok
     if (empty($errors)) {
-
         $password_hash = password_hash($password, PASSWORD_BCRYPT);
 
-        dd($password_hash);
+        $req = $db->prepare("INSERT INTO users SET nom = :nom, email = :email, password = :password ");
+        $req->execute(['nom' => $nom, 'email' => $email, 'password' => $password_hash]);
+        // $user_id = $db->lastInsertId();
 
-
-        $req = $db->prepare("INSERT INTO users SET nom = ?, email = ?, password = ? ");
-        $req->execute([$nom, $email, $password_hash]);
-        $_SESSION['message'] = 'Bien enregistrer';
         $_SESSION['color'] = 'info';
+        $_SESSION['message'] = 'Bien enregister';
         header('Location: login.php');
-        exit;
+        exit();
     } else {
-        dd($errors);
+        // $_SESSION['color'] = 'danger';
+        // $_SESSION['message'] = implode('<br>', $errors);
+        // header('Location: register2.php');
+        // exit();
     }
-
-    exit;
-
-
-
-
-    // $user_id = $db->lastInsertId();
-
-    // $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?");
-    // $req->execute([$user_id, IP]);
-
-    $_SESSION['message'] = "Bien enregister";
-    $_SESSION['color'] = "info";
-    header('Location:login.php');
-    exit;
 }
 
 ?>
@@ -121,8 +110,21 @@ if (isset($_POST['register'])) {
 
         <?php include 'body/message_flash.php' ?>
 
+        <?php if (!empty($errors)) : ?>
+            <div class="alert alert-danger">
+                <ul>
+                    <?php foreach ($errors as $key => $e) : ?>
+                        <li>
+                            <b><?= $key ?></b>
+                            <?= $e ?>
+                        </li>
+                    <?php endforeach  ?>
+                </ul>
+            </div>
+        <?php endif ?>
+
         <div class="row justify-content-center g-2 mt-5">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
                         <h4>Register</h4>
@@ -132,17 +134,40 @@ if (isset($_POST['register'])) {
                         <form method="post">
                             <div class="mb-3">
                                 <label for="nom" class="form-label">Nom</label>
-                                <input type="text" class="form-control" name="nom" id="nom" placeholder="Email:">
+                                <input type="text" class="form-control <?= $nom_class_input ?>" name="nom" id="nom" placeholder="Nom:" value="<?= $nom ?? '' ?>">
+
+                                <span class="text-danger <?= $nom_class_feedback ?? '' ?>">
+                                    <?= $errors["nom"] ?? '' ?>
+                                </span>
                             </div>
+
+                            <?php // input($nom, $nom_class_input, $nom_class_feedback, $errors["nom"]) 
+                            ?>
+
+
 
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="Email:">
+                                <input type="email" class="form-control <?= $email_class_input ?>" name="email" id="email" placeholder="Email:" value="<?= $email ?? '' ?>">
+                                <span class="text-danger <?= $email_class_feedback ?? '' ?>">
+                                    <?= $errors["email"] ?? '' ?>
+                                </span>
                             </div>
 
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="password" id="password" placeholder="Password:">
+                                <input type="password" class="form-control <?= $password_class_input ?>" name="password" id="password" placeholder="Password:">
+                                <span class="text-danger <?= $password_class_feedback ?? '' ?>">
+                                    <?= $errors["password"] ?? '' ?>
+                                </span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="confirm_password" class="form-label">Confirme Password</label>
+                                <input type="password" class="form-control <?= $confirm_password_class_input ?>" name="confirm_password" id="confirm_password" placeholder="Confirme Password:">
+                                <span class="text-danger <?= $confirm_passwordclass_feedback ?? '' ?>">
+                                    <?= $errors["confirm_password"] ?? '' ?>
+                                </span>
                             </div>
 
                             <button type="submit" name="register" class="btn btn-primary">
