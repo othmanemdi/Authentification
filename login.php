@@ -3,52 +3,62 @@ require_once "database/db.php";
 require_once "helpers/functions.php";
 $page = _get_page_name();
 $title = "login";
-// $password = 123456;
-// $password_hash = '$2y$10$OyFrczwupnuXc50nEcV6dOoN6enRVL5ofbOOYk7YIJIIWGnt3shaK';
-
-// $test = password_verify($password, $password_hash);
-
-// var_dump($test);
-
-// exit;
-
-
-
-// $_GET;
-// $_POST;
-// $_SERVER;
-// $_COOKIE;
-// $_SESSION;
-// $_FILES;
 
 $plateform = trim($_SERVER['HTTP_SEC_CH_UA_PLATFORM'], '"');
+$errors = [];
 
 if (isset($_POST['login'])) {
 
-    $email = e($_POST['email']);
-    $password = e($_POST['password']);
+    if (isset($_POST['email'], $_POST['password'])) {
+        $email = e($_POST['email']);
+        $password = e($_POST['password']);
 
-    $req = $db->prepare("SELECT id FROM users WHERE email = :email AND password = :password LIMIT 1");
-    $req->execute(['email' => $email, 'password' => $password]);
-    $rows = $req->rowCount();
-    if ($rows == 0) {
-        $_SESSION['message'] = "Mot de passe incorrecte";
-        $_SESSION['color'] = "danger";
-        header('Location:login.php');
-        exit;
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors["email"] = "Votre email n'est pas valide";
+            $email_class_input = "is-invalid";
+            $email_class_feedback = "invalid-feedback";
+        } else {
+            $email_class_input = "is-valid";
+            $email_class_feedback = "valid-feedback";
+        } // Fin traitement email
+
+        if (empty($password) || !preg_match('/^[a-zA-Z0-9-@$*. ]+$/', $password)) {
+            $errors["password"] = "Votre mot de passe n'est pas valide";
+            $password_class_input = "is-invalid";
+            $password_class_feedback = "invalid-feedback";
+        } else {
+            $password_class_input = "is-valid";
+            $password_class_feedback = "valid-feedback";
+        }
+    } else {
+        $errors[] = "Veuillez remplire votre email et mot de passe";
     }
-    $user_id = $req->fetch()->id;
+    if (empty($errors)) {
 
-    $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?, plateform = ?");
-    $req->execute([$user_id, IP, $plateform]);
+        $req = $db->prepare('SELECT id,password FROM users WHERE email = ? LIMIT 1');
+        $req->execute([$email]);
+        $fetch_user = $req->fetch();
+        $password_hash = $fetch_user->password;
 
-    $_SESSION['message'] = "Bien coonecter";
-    $_SESSION['color'] = "info";
-    header('Location:dashboard.php');
-    exit;
+        if (password_verify($password, $password_hash)) {
+            $user_id = $fetch_user->id;
+            $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?, plateform = ?");
+            $req->execute([$user_id, IP, $plateform]);
+            $_SESSION['message'] = "Bien coonecter";
+            $_SESSION['color'] = "info";
+            header('Location:dashboard.php');
+            exit;
+        } else {
+            $_SESSION['message'] = "Mot de passe ou email incorrecte";
+            $_SESSION['color'] = "danger";
+            $email_class_input = "is-invalid";
+            $password_class_input = "is-invalid";
+            // header('Location:login.php');
+            // exit;
+        }
+    }
 }
 ?>
-
 <!doctype html>
 <html lang="en">
 
@@ -64,6 +74,18 @@ if (isset($_POST['login'])) {
     <main class="container">
 
         <?php include 'body/message_flash.php' ?>
+        <?php if (!empty($errors)) : ?>
+            <div class="alert alert-danger">
+                <ul>
+                    <?php foreach ($errors as $key => $e) : ?>
+                        <li>
+                            <b><?= ucfirst($key) ?></b>
+                            <?= $e ?>
+                        </li>
+                    <?php endforeach  ?>
+                </ul>
+            </div>
+        <?php endif ?>
 
         <div class="row justify-content-center g-2 mt-5">
             <div class="col-md-6">
@@ -76,12 +98,18 @@ if (isset($_POST['login'])) {
                         <form method="post">
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" id="email" placeholder="Email:">
+                                <input type="email" class="form-control <?= $email_class_input ?? '' ?>" name="email" id="email" placeholder="Email:" value="<?= $_POST['email'] ?? '' ?>">
+                                <span class="text-danger <?= $email_class_feedback ?? '' ?>">
+                                    <?= $errors["email"] ?? '' ?>
+                                </span>
                             </div>
 
                             <div class="mb-3">
                                 <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="password" id="password" placeholder="Password:">
+                                <input type="password" class="form-control <?= $password_class_input ?? '' ?>" name="password" id="password" placeholder="Password:">
+                                <span class="text-danger <?= $password_class_feedback ?? '' ?>">
+                                    <?= $errors["password"] ?? '' ?>
+                                </span>
                             </div>
 
                             <div class="row mb-3">
