@@ -1,6 +1,8 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
+logged();
+
 $page = _get_page_name();
 $title = "register";
 
@@ -82,7 +84,11 @@ if (isset($_POST['register'])) {
 
         $_SESSION['color'] = 'info';
         $_SESSION['message'] = 'Bien enregister';
-        header('Location: login.php');
+        // http_response_code(308);
+        // // header("HTTP/1.1 301 Moved Permanently");
+        // // header("Location: /option-a");
+        header('Location: login.php', true, 301);
+        exit;
         exit();
     } else {
         // $_SESSION['color'] = 'danger';

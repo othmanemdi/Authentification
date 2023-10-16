@@ -1,8 +1,10 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
+not_allowed();
 $page = _get_page_name();
 $title = "dashboard";
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -17,7 +19,7 @@ $title = "dashboard";
         <?php include "body/nav.php" ?>
     </header>
     <main class="container">
-
+        <?php include 'body/message_flash.php' ?>
         <h3 class="my-3">Dashboard</h3>
 
     </main>

@@ -1,14 +1,18 @@
 <?php
 require_once "database/db.php";
 require_once "helpers/functions.php";
+logged();
+
 $page = _get_page_name();
 $title = "login";
-
+// var_dump(http_response_code(404));
+// exit;
 $plateform = trim($_SERVER['HTTP_SEC_CH_UA_PLATFORM'], '"');
 $errors = [];
 
 if (isset($_POST['login'])) {
-
+    // dd($_SERVER['REQUEST_METHOD']);
+    // dd(123);
     if (isset($_POST['email'], $_POST['password'])) {
         $email = e($_POST['email']);
         $password = e($_POST['password']);
@@ -35,7 +39,7 @@ if (isset($_POST['login'])) {
     }
     if (empty($errors)) {
 
-        $req = $db->prepare('SELECT id,password FROM users WHERE email = ? LIMIT 1');
+        $req = $db->prepare('SELECT * FROM users WHERE email = ? LIMIT 1');
         $req->execute([$email]);
         $fetch_user = $req->fetch();
         $password_hash = $fetch_user->password;
@@ -44,6 +48,9 @@ if (isset($_POST['login'])) {
             $user_id = $fetch_user->id;
             $req = $db->prepare("INSERT INTO user_historique SET user_id = ?, ip = ?, plateform = ?");
             $req->execute([$user_id, IP, $plateform]);
+
+            $_SESSION['auth'] = $fetch_user;
+
             $_SESSION['message'] = "Bien coonecter";
             $_SESSION['color'] = "info";
             header('Location:dashboard.php');

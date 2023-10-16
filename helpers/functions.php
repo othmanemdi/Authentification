@@ -15,6 +15,28 @@ function dd($value)
 }
 
 
+
+function not_allowed()
+{
+    if (!isset($_SESSION['auth'])) {
+        $_SESSION['message'] = "Vous ñ'êtes pas autoriser";
+        $_SESSION['color'] = "danger";
+        header('Location:login.php');
+        exit;
+    }
+}
+
+function logged()
+{
+    if (isset($_SESSION['auth'])) {
+        $_SESSION['message'] = "Vous êtes déja connecté";
+        $_SESSION['color'] = "info";
+        header('Location:dashboard.php');
+        exit;
+    }
+}
+
+
 function input($value, $class_input, $class_message, $error)
 {
     return <<<HTML
