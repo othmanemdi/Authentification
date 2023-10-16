@@ -14,8 +14,6 @@ function dd($value)
     exit;
 }
 
-
-
 function not_allowed()
 {
     if (!isset($_SESSION['auth'])) {
@@ -35,7 +33,6 @@ function logged()
         exit;
     }
 }
-
 
 function input($value, $class_input, $class_message, $error)
 {

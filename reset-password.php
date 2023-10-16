@@ -26,7 +26,7 @@ $title = "Changer le mot de passe";
             <div class="col-md-3 mb-3">
 
                 <div class="list-group">
-                    <a href="profile" class="list-group-item list-group-item-action ">
+                    <a href="profil.php" class="list-group-item list-group-item-action ">
                         Donnée personnelle
                     </a>
                     <a href="reset-password.php" class="list-group-item list-group-item-action active" aria-current="true">

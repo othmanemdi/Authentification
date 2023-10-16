@@ -76,6 +76,11 @@ $title = "profil";
                                     <center>
                                         <img width="150" src="https://ui-avatars.com/api/?background=random&format=svg&rounded=true&backgrounda=000&colora=fff&name=<?= $_SESSION['auth']->nom ?>" alt="">
                                     </center>
+
+                                    <div>
+                                        <label for="" class="form-label">Photo profil</label>
+                                        <input type="file" class="form-control" name="image" id="image">
+                                    </div>
                                 </div>
 
                             </div>
